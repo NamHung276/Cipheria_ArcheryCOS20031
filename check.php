@@ -47,7 +47,7 @@ $data = $_SESSION['archeryFormData'] ?? null;
       <?php endif; ?>
     </div>
 
-    <form action="form2.php" method="post" style="display:inline;">
+    <form action="form.php" method="post" style="display:inline;">
       <button type="submit">Back to Edit</button>
     </form>
 
