@@ -39,13 +39,13 @@ elif choice == "Add Score":
         last_name = st.text_input("Last Name")
         dob = st.date_input("Date of Birth", date.today())
         gender = st.selectbox("Gender", ["F", "M"])
-        equipment = st.selectbox("Equipment", ["Recurve", "Compound", "Recurve Barebow", "Compound Barebow", "Longbow"])
-        category = st.selectbox("Category", ["Female Open","Male Open","50+ Female","50+ Male",
-                                             "60+ Female","60+ Male","70+ Female","70+ Male",
-                                             "Under 21 Female","Under 21 Male","Under 18 Female","Under 18 Male",
-                                             "Under 16 Female","Under 16 Male","Under 14 Female","Under 14 Male"])
+        equipment_name = st.selectbox("Equipment", ["Recurve", "Compound", "Recurve Barebow", "Compound Barebow", "Longbow"])
+        category_name = st.selectbox("Category", ["Female Open","Male Open","50+ Female","50+ Male",
+                                                  "60+ Female","60+ Male","70+ Female","70+ Male",
+                                                  "Under 21 Female","Under 21 Male","Under 18 Female","Under 18 Male",
+                                                  "Under 16 Female","Under 16 Male","Under 14 Female","Under 14 Male"])
         round_name = st.text_input("Round Name")
-        division = st.selectbox("Division", ["Recurve","Compound","Recurve Barebow","Compound Barebow","Longbow"])
+        division_name = st.selectbox("Division", ["Recurve","Compound","Recurve Barebow","Compound Barebow","Longbow"])
         total_score = st.number_input("Total Score", min_value=0)
         submit = st.form_submit_button("Submit Score")
 
@@ -53,27 +53,59 @@ elif choice == "Add Score":
         conn = get_connection()
         cursor = conn.cursor()
 
-        # 1️⃣ Get or insert Archer
-        cursor.execute("""
-            SELECT archer_id FROM Archer WHERE first_name=%s AND last_name=%s AND date_of_birth=%s
-        """, (first_name, last_name, dob))
+        # --------------------
+        # Get or insert Archer
+        # --------------------
+        cursor.execute("SELECT archer_id FROM Archer WHERE first_name=%s AND last_name=%s AND date_of_birth=%s",
+                       (first_name, last_name, dob))
         result = cursor.fetchone()
         if result:
             archer_id = result[0]
         else:
-            # Map equipment and category IDs (here we assume ID=1 for simplicity)
-            equipment_id = 1
-            category_id = 1
+            # Map equipment_id
+            cursor.execute("SELECT equipment_id FROM Equipment WHERE name=%s", (equipment_name,))
+            eq_result = cursor.fetchone()
+            equipment_id = eq_result[0] if eq_result else None
+
+            # Map category_id
+            cursor.execute("SELECT category_id FROM Category WHERE name=%s", (category_name,))
+            cat_result = cursor.fetchone()
+            category_id = cat_result[0] if cat_result else None
+
             cursor.execute("""
                 INSERT INTO Archer (first_name, last_name, date_of_birth, gender, default_equipment_id, category_id)
                 VALUES (%s,%s,%s,%s,%s,%s)
             """, (first_name, last_name, dob, gender, equipment_id, category_id))
             archer_id = cursor.lastrowid
 
-        # 2️⃣ Insert Score (approved=False by default)
-        # Again, using IDs=1 for round_id and division_id for simplicity; in practice fetch from DB
-        round_id = 1
-        division_id = 1
+        # --------------------
+        # Get or insert Round
+        # --------------------
+        cursor.execute("SELECT round_id FROM Round WHERE name=%s", (round_name,))
+        r = cursor.fetchone()
+        if r:
+            round_id = r[0]
+        else:
+            cursor.execute("INSERT INTO Round (name, total_ranges) VALUES (%s,%s)", (round_name, 1))
+            round_id = cursor.lastrowid
+
+        # --------------------
+        # Get or insert Division
+        # --------------------
+        cursor.execute("SELECT division_id FROM Division WHERE name=%s", (division_name,))
+        d = cursor.fetchone()
+        if d:
+            division_id = d[0]
+        else:
+            cursor.execute("""
+                INSERT INTO Division (name, category_id, equipment_id)
+                VALUES (%s, %s, %s)
+            """, (division_name, category_id if category_id else 1, equipment_id if equipment_id else 1))
+            division_id = cursor.lastrowid
+
+        # --------------------
+        # Insert Score
+        # --------------------
         cursor.execute("""
             INSERT INTO Score (archer_id, round_id, division_id, total_score, date_recorded, approved)
             VALUES (%s,%s,%s,%s,NOW(),FALSE)
@@ -114,7 +146,7 @@ elif choice == "Recorder Approval":
 # --------------------
 elif choice == "Leaderboard":
     st.subheader("🏆 Detailed Leaderboard")
-    
+
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -136,15 +168,15 @@ elif choice == "Leaderboard":
         WHERE s.approved=TRUE
         ORDER BY s.total_score DESC
     """)
-    
+
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
-    
+
     # Prepare data for display
     leaderboard_data = []
     for i, row in enumerate(rows, start=1):
-        full_name = f"{row[0]} {row[1]}"  # Removed middle_name
+        full_name = f"{row[0]} {row[1]}"
         leaderboard_data.append({
             "Rank": i,
             "Name": full_name,
@@ -156,6 +188,6 @@ elif choice == "Leaderboard":
             "Equipment": row[7],
             "Date": row[8].strftime("%Y-%m-%d")
         })
-    
-    # Display using Streamlit table
-    st.dataframe(leaderboard_data, width=1000)
+
+    # Display using Streamlit dataframe with wider view
+    st.dataframe(leaderboard_data, width=1200)
