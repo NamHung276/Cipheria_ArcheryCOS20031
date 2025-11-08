@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Archery Score Recording</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <h1>Archery Score Recording</h1>
+    <form id="archeryForm" action="submit_score.php" method="POST">
+      <h2>Player Information</h2>
+
+      <label for="firstName">First Name:</label>
+      <input type="text" id="firstName" name="firstName" required>
+
+      <label for="middleName">Middle Name (optional):</label>
+      <input type="text" id="middleName" name="middleName">
+
+      <label for="lastName">Last Name:</label>
+      <input type="text" id="lastName" name="lastName" required>
+
+      <label for="age">Age:</label>
+      <input type="number" id="age" name="age" min="1" max="100" required>
+
+      <label for="gender">Gender:</label>
+      <select id="gender" name="gender" required>
+        <option value="">--Select Gender--</option>
+        <option value="Female">Female</option>
+        <option value="Male">Male</option>
+      </select>
+
+      <label for="club">Club:</label>
+      <input type="text" id="club" name="club" required>
+
+      <h2>Shooting Information</h2>
+
+      <label for="date">Date:</label>
+      <input type="date" id="date" name="date" required>
+
+      <label for="round">Round:</label>
+      <input type="text" id="round" name="round" required>
+
+      <label for="distance">Distance (m):</label>
+      <input type="number" id="distance" name="distance" min="1" max="100" required>
+
+      <label for="target">Target Face (cm):</label>
+      <input type="number" id="target" name="target" min="20" max="200" required>
+
+      <label for="category">Category (Age & Gender):</label>
+      <select id="category" name="category" required>
+        <option value="">--Select Category--</option>
+        <option value="female_open">Female Open</option>
+        <option value="male_open">Male Open</option>
+        <option value="50_female">50+ Female</option>
+        <option value="50_male">50+ Male</option>
+        <option value="60_female">60+ Female</option>
+        <option value="60_male">60+ Male</option>
+        <option value="70_female">70+ Female</option>
+        <option value="70_male">70+ Male</option>
+        <option value="under21_female">Under 21 Female</option>
+        <option value="under21_male">Under 21 Male</option>
+        <option value="under18_female">Under 18 Female</option>
+        <option value="under18_male">Under 18 Male</option>
+        <option value="under16_female">Under 16 Female</option>
+        <option value="under16_male">Under 16 Male</option>
+        <option value="under14_female">Under 14 Female</option>
+        <option value="under14_male">Under 14 Male</option>
+      </select>
+
+      <label for="division">Division (Equipment):</label>
+      <select id="division" name="division" required>
+        <option value="">--Select Division--</option>
+        <option value="recurve">Recurve</option>
+        <option value="compound">Compound</option>
+        <option value="recurve_barebow">Recurve Barebow</option>
+        <option value="compound_barebow">Compound Barebow</option>
+        <option value="longbow">Longbow</option>
+      </select>
+
+      <div class="form-buttons">
+        <button type="button" class="back-btn" onclick="window.history.back()">Back</button>
+        <button type="submit">Submit</button>
+        <button type="reset" class="small">Reset</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="form.js"></script>
+</body>
+</html>
